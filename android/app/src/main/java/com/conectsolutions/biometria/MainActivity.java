@@ -1,16 +1,21 @@
 package com.conectsolutions.biometria;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.tabs.TabLayout;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -25,20 +30,40 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Conect Solutions TI - Activity Principal Android
- * Integração BiometricPrompt -> Microserviço VCL via HTTP POST
+ * Conect Solutions TI - Activity Principal Android com Abas
+ * 1. Login VCL
+ * 2. Aprovação PDV (2FA)
+ * 3. Meu Dispositivo (UserControl)
  */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    private TabLayout tabLayout;
+    private LinearLayout layoutTabLogin;
+    private LinearLayout layoutTabPDV;
+    private LinearLayout layoutTabDispositivo;
+
+    // Campos Aba 1 (Login)
     private EditText edtPCIp;
     private EditText edtPort;
     private EditText edtUser;
     private Button btnAutenticar;
+
+    // Campos Aba 2 (PDV)
+    private Button btnAprovarPDV;
+
+    // Campos Aba 3 (Dispositivo)
+    private TextView txtModeloAparelho;
+    private TextView txtDeviceId;
+    private TextView txtUsuarioVinculado;
+    private Button btnTestarConexao;
+
+    // Feedback comum
     private TextView txtStatus;
     private TextView txtLogs;
 
+    private String deviceIdValue = "";
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
@@ -47,24 +72,103 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Mapeamento dos componentes de abas
+        tabLayout = findViewById(R.id.tabLayout);
+        layoutTabLogin = findViewById(R.id.layoutTabLogin);
+        layoutTabPDV = findViewById(R.id.layoutTabPDV);
+        layoutTabDispositivo = findViewById(R.id.layoutTabDispositivo);
+
+        // Mapeamento Aba 1
         edtPCIp = findViewById(R.id.edtPCIp);
         edtPort = findViewById(R.id.edtPort);
         edtUser = findViewById(R.id.edtUser);
         btnAutenticar = findViewById(R.id.btnAutenticar);
+
+        // Mapeamento Aba 2
+        btnAprovarPDV = findViewById(R.id.btnAprovarPDV);
+
+        // Mapeamento Aba 3
+        txtModeloAparelho = findViewById(R.id.txtModeloAparelho);
+        txtDeviceId = findViewById(R.id.txtDeviceId);
+        txtUsuarioVinculado = findViewById(R.id.txtUsuarioVinculado);
+        btnTestarConexao = findViewById(R.id.btnTestarConexao);
+
+        // Feedback
         txtStatus = findViewById(R.id.txtStatus);
         txtLogs = findViewById(R.id.txtLogs);
 
-        appendLog("App inicializado. Sensor biométrico pronto.");
+        // Identificação única do dispositivo (UserControl DeviceId)
+        try {
+            String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            deviceIdValue = Build.MODEL + "-" + (androidId != null ? androidId : "DEV01");
+        } catch (Exception e) {
+            deviceIdValue = Build.MODEL + "-UNKNOWN";
+        }
 
+        txtModeloAparelho.setText(Build.MANUFACTURER + " " + Build.MODEL);
+        txtDeviceId.setText(deviceIdValue);
+
+        appendLog("App Conect Solutions iniciado.");
+        appendLog("Aparelho: " + Build.MODEL + " | DeviceID: " + deviceIdValue);
+
+        // Controle de alternância de abas
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                alternarAba(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        // Ação Aba 1: Autenticar Login
         btnAutenticar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                iniciarAutenticacao();
+                dispararBiometria("login");
+            }
+        });
+
+        // Ação Aba 2: Aprovação Gerencial de PDV (2FA)
+        btnAprovarPDV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dispararBiometria("aprovacao_pdv");
+            }
+        });
+
+        // Ação Aba 3: Testar Conexão
+        btnTestarConexao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testarConexaoServidor();
             }
         });
     }
 
-    private void iniciarAutenticacao() {
+    private void alternarAba(int posicao) {
+        layoutTabLogin.setVisibility(posicao == 0 ? View.VISIBLE : View.GONE);
+        layoutTabPDV.setVisibility(posicao == 1 ? View.VISIBLE : View.GONE);
+        layoutTabDispositivo.setVisibility(posicao == 2 ? View.VISIBLE : View.GONE);
+
+        switch (posicao) {
+            case 0:
+                txtStatus.setText("Aba 1: Login VCL selecionada.");
+                break;
+            case 1:
+                txtStatus.setText("Aba 2: Aprovação Gerencial de PDV selecionada.");
+                break;
+            case 2:
+                txtStatus.setText("Aba 3: Informações do Aparelho (UserControl).");
+                break;
+        }
+    }
+
+    private void dispararBiometria(final String operacao) {
         final String ip = edtPCIp.getText().toString().trim();
         final String port = edtPort.getText().toString().trim();
         final String user = edtUser.getText().toString().trim();
@@ -76,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
 
         txtStatus.setText("Aguardando leitura da sua digital no sensor...");
         txtStatus.setBackgroundColor(0xFFE8EAF6);
-        appendLog("Acionando BiometricPrompt para o usuário: " + user);
+        appendLog("Acionando BiometricPrompt (" + operacao + ") para o usuário: " + user);
 
         BiometricHelper.showBiometricPrompt(this, user, new BiometricHelper.BiometricCallback() {
             @Override
@@ -84,12 +188,11 @@ public class MainActivity extends AppCompatActivity {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        txtStatus.setText("Digital confirmada! Enviando liberação para o PC...");
-                        txtStatus.setBackgroundColor(0xFFC8E6C9); // Verde claro
+                        txtStatus.setText("Digital confirmada! Enviando dados ao PC...");
+                        txtStatus.setBackgroundColor(0xFFC8E6C9);
                         appendLog("SUCESSO: Biometria validada para " + userName);
 
-                        // Dispara envio HTTP assíncrono em segundo plano
-                        enviarConfirmacaoAoPC(ip, port, userName);
+                        enviarConfirmacaoAoPC(ip, port, userName, operacao);
                     }
                 });
             }
@@ -99,8 +202,8 @@ public class MainActivity extends AppCompatActivity {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        txtStatus.setText("Erro na biometria: " + errorMessage);
-                        txtStatus.setBackgroundColor(0xFFFFCDD2); // Vermelho claro
+                        txtStatus.setText("Falha na biometria: " + errorMessage);
+                        txtStatus.setBackgroundColor(0xFFFFCDD2);
                         appendLog("FALHA (" + errorCode + "): " + errorMessage);
                     }
                 });
@@ -108,15 +211,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void enviarConfirmacaoAoPC(final String ip, final String port, final String user) {
+    private void enviarConfirmacaoAoPC(final String ip, final String port, final String user, final String operacao) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 final String targetUrl = "http://" + ip + ":" + port + "/biometria-sucesso";
-                final String jsonPayload = "{\"user\": \"" + user + "\", \"status\": \"approved\"}";
+                final String jsonPayload = "{"
+                        + "\"user\": \"" + user + "\", "
+                        + "\"status\": \"approved\", "
+                        + "\"device_id\": \"" + deviceIdValue + "\", "
+                        + "\"operation\": \"" + operacao + "\""
+                        + "}";
 
                 appendLog("[HTTP] POST " + targetUrl);
-                appendLog("[HTTP] Payload: " + jsonPayload);
 
                 HttpURLConnection conn = null;
                 try {
@@ -124,12 +231,11 @@ public class MainActivity extends AppCompatActivity {
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-                    conn.setRequestProperty("User-Agent", "ConectSolutions-Android-App/1.0");
+                    conn.setRequestProperty("User-Agent", "ConectSolutions-Android-App/2.0");
                     conn.setConnectTimeout(5000);
                     conn.setReadTimeout(5000);
                     conn.setDoOutput(true);
 
-                    // Escreve o corpo da requisição
                     try (OutputStream os = conn.getOutputStream()) {
                         byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
                         os.write(input, 0, input.length);
@@ -154,39 +260,75 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     final String result = responseBody.toString();
-                    Log.i(TAG, "Resposta do PC (" + responseCode + "): " + result);
 
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             if (responseCode == 200) {
-                                txtStatus.setText("ACESSO LIBERADO NO SISTEMA VCL COM SUCESSO!");
-                                txtStatus.setBackgroundColor(0xFF81C784); // Verde vibrante
-                                appendLog("RESPOSTA 200 OK: " + result);
-                                Toast.makeText(MainActivity.this, "Acesso VCL Liberado!", Toast.LENGTH_LONG).show();
+                                txtStatus.setText("ACESSO APROVADO NO SISTEMA VCL!");
+                                txtStatus.setBackgroundColor(0xFF81C784);
+                                appendLog("200 OK: " + result);
+                                Toast.makeText(MainActivity.this, "Autorizado com Sucesso!", Toast.LENGTH_SHORT).show();
                             } else {
-                                txtStatus.setText("Servidor VCL recusou (Código " + responseCode + ")");
-                                txtStatus.setBackgroundColor(0xFFFFB74D); // Laranja
+                                txtStatus.setText("Recusado pelo Servidor (Código " + responseCode + ")");
+                                txtStatus.setBackgroundColor(0xFFFFB74D);
                                 appendLog("RESPOSTA " + responseCode + ": " + result);
                             }
                         }
                     });
 
                 } catch (final Exception e) {
-                    Log.e(TAG, "Erro ao conectar no PC: " + e.getMessage(), e);
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            txtStatus.setText("Erro de rede: " + e.getMessage());
+                            txtStatus.setText("Erro de conexão: " + e.getMessage());
                             txtStatus.setBackgroundColor(0xFFFFCDD2);
                             appendLog("ERRO DE CONEXÃO: " + e.getMessage());
-                            appendLog("Dica: Verifique se o ServerVCL.exe está rodando e na mesma rede.");
                         }
                     });
                 } finally {
-                    if (conn != null) {
-                        conn.disconnect();
-                    }
+                    if (conn != null) conn.disconnect();
+                }
+            }
+        });
+    }
+
+    private void testarConexaoServidor() {
+        final String ip = edtPCIp.getText().toString().trim();
+        final String port = edtPort.getText().toString().trim();
+
+        appendLog("Testando comunicação com: http://" + ip + ":" + port + "...");
+        txtStatus.setText("Testando conexão com o PC...");
+
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(3000);
+                    conn.connect();
+                    final int code = conn.getResponseCode();
+                    conn.disconnect();
+
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtStatus.setText("Conexão OK! Servidor respondeu (Código " + code + ")");
+                            txtStatus.setBackgroundColor(0xFFC8E6C9);
+                            appendLog("CONEXÃO OK: Servidor VCL ativo e acessível na porta " + port);
+                            Toast.makeText(MainActivity.this, "Conexão com PC OK!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtStatus.setText("Falha de conexão: " + e.getMessage());
+                            txtStatus.setBackgroundColor(0xFFFFCDD2);
+                            appendLog("FALHA DE REDE: Não foi possível alcançar o PC: " + e.getMessage());
+                        }
+                    });
                 }
             }
         });

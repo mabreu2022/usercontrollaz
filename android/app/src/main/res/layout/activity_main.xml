@@ -1,129 +1,315 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F4F6F9"
-    android:padding="20dp">
+    android:background="#F4F6F9">
 
-    <!-- Cabeçalho -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Conect Solutions TI"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#1A237E"
-        android:gravity="center"
-        android:layout_marginTop="20dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Autenticação Biométrica Mobile -> VCL"
-        android:textSize="14sp"
-        android:textColor="#555555"
-        android:gravity="center"
-        android:layout_marginBottom="25dp" />
-
-    <!-- Card de Configuração -->
+    <!-- Cabeçalho Superior -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#FFFFFF"
-        android:elevation="4dp"
-        android:padding="16dp"
-        android:layout_marginBottom="20dp">
+        android:background="#1A237E"
+        android:padding="16dp">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="IP do PC (Servidor VCL):"
-            android:textStyle="bold"
-            android:textColor="#333333" />
-
-        <EditText
-            android:id="@+id/edtPCIp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Ex: 192.168.15.119 ou 127.0.0.1"
-            android:text="192.168.15.119"
-            android:inputType="textUri"
-            android:layout_marginBottom="12dp" />
+            android:text="Conect Solutions TI"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Porta TCP:"
-            android:textStyle="bold"
-            android:textColor="#333333" />
-
-        <EditText
-            android:id="@+id/edtPort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="8080"
-            android:inputType="number"
-            android:layout_marginBottom="12dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Usuário:"
-            android:textStyle="bold"
-            android:textColor="#333333" />
-
-        <EditText
-            android:id="@+id/edtUser"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="mauricio"
-            android:inputType="textPersonName" />
+            android:text="Autenticação Biométrica Mobile -> VCL"
+            android:textSize="12sp"
+            android:textColor="#C5CAE9"
+            android:gravity="center" />
     </LinearLayout>
 
-    <!-- Botão de Ação -->
-    <Button
-        android:id="@+id/btnAutenticar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="VALIDAR BIOMETRIA E LIBERAR VCL"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#1A237E"
-        android:layout_marginBottom="16dp" />
-
-    <!-- Status Feedback -->
-    <TextView
-        android:id="@+id/txtStatus"
+    <!-- Barra de Abas (TabLayout) -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Pronto para autenticar. Toque no botão acima."
-        android:textSize="14sp"
-        android:textColor="#333333"
-        android:gravity="center"
-        android:padding="10dp"
-        android:background="#E8EAF6"
-        android:layout_marginBottom="12dp" />
+        android:background="#FFFFFF"
+        app:tabIndicatorColor="#1A237E"
+        app:tabSelectedTextColor="#1A237E"
+        app:tabTextColor="#666666"
+        app:tabMode="fixed"
+        app:tabGravity="fill">
 
-    <!-- Log de Rede -->
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1. Login VCL" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2. Aprovar PDV" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3. Dispositivo" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- Conteúdo das Abas com Scroll -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#263238"
-        android:padding="10dp">
+        android:padding="16dp">
 
-        <TextView
-            android:id="@+id/txtLogs"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="[Console de Comunicação HTTP]\n"
-            android:textColor="#80CBC4"
-            android:fontFamily="monospace"
-            android:textSize="12sp" />
+            android:orientation="vertical">
+
+            <!-- ========================================================= -->
+            <!-- ABA 1: LOGIN VCL                                          -->
+            <!-- ========================================================= -->
+            <LinearLayout
+                android:id="@+id/layoutTabLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#FFFFFF"
+                android:elevation="3dp"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IP do PC (Servidor VCL):"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+                <EditText
+                    android:id="@+id/edtPCIp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ex: 192.168.15.119 ou 127.0.0.1"
+                    android:text="192.168.15.119"
+                    android:inputType="textUri"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Porta TCP:"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+                <EditText
+                    android:id="@+id/edtPort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="8080"
+                    android:inputType="number"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Usuário:"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+                <EditText
+                    android:id="@+id/edtUser"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="mauricio"
+                    android:inputType="textPersonName"
+                    android:layout_marginBottom="16dp" />
+
+                <Button
+                    android:id="@+id/btnAutenticar"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:text="AUTENTICAR COM DIGITAL (LOGIN)"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#1A237E" />
+            </LinearLayout>
+
+            <!-- ========================================================= -->
+            <!-- ABA 2: APROVAÇÃO PDV (2FA)                                -->
+            <!-- ========================================================= -->
+            <LinearLayout
+                android:id="@+id/layoutTabPDV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#FFFFFF"
+                android:elevation="3dp"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Aprovação Remota de Caixa / PDV"
+                    android:textStyle="bold"
+                    android:textColor="#1A237E"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Operação Pendente no Caixa:"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Desconto Especial de 25% (R$ 150,00)\nTerminal PDV: 01 | Venda #1042"
+                    android:textColor="#C62828"
+                    android:background="#FFEBEE"
+                    android:padding="10dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Requisito: Exige digital de Gerente ou Administrador."
+                    android:textColor="#555555"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp" />
+
+                <Button
+                    android:id="@+id/btnAprovarPDV"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:text="AUTORIZAR OPERAÇÃO GERENCIAL"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#2E7D32" />
+            </LinearLayout>
+
+            <!-- ========================================================= -->
+            <!-- ABA 3: MEU DISPOSITIVO (USERCONTROL)                      -->
+            <!-- ========================================================= -->
+            <LinearLayout
+                android:id="@+id/layoutTabDispositivo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#FFFFFF"
+                android:elevation="3dp"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Informações do Aparelho (UserControl)"
+                    android:textStyle="bold"
+                    android:textColor="#1A237E"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Modelo do Celular:"
+                    android:textStyle="bold"
+                    android:textColor="#555555" />
+
+                <TextView
+                    android:id="@+id/txtModeloAparelho"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Samsung Galaxy S20 FE (SM-G780G)"
+                    android:textColor="#1A237E"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Identificador Único (Device ID):"
+                    android:textStyle="bold"
+                    android:textColor="#555555" />
+
+                <TextView
+                    android:id="@+id/txtDeviceId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Carregando..."
+                    android:fontFamily="monospace"
+                    android:textSize="11sp"
+                    android:textColor="#333333"
+                    android:background="#EEEEEE"
+                    android:padding="6dp"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Usuário Vinculado:"
+                    android:textStyle="bold"
+                    android:textColor="#555555" />
+
+                <TextView
+                    android:id="@+id/txtUsuarioVinculado"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="mauricio (Administrador)"
+                    android:textColor="#2E7D32"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="14dp" />
+
+                <Button
+                    android:id="@+id/btnTestarConexao"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="TESTAR CONEXÃO COM O PC"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#455A64" />
+            </LinearLayout>
+
+            <!-- Feedback de Status -->
+            <TextView
+                android:id="@+id/txtStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Selecione uma aba ou toque para autenticar."
+                android:textSize="13sp"
+                android:textColor="#333333"
+                android:gravity="center"
+                android:padding="12dp"
+                android:background="#E8EAF6"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Console de Logs HTTP -->
+            <TextView
+                android:id="@+id/txtLogs"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:background="#263238"
+                android:padding="10dp"
+                android:text="[Console de Comunicação HTTP]\n"
+                android:textColor="#80CBC4"
+                android:fontFamily="monospace"
+                android:textSize="11sp"
+                android:scrollbars="vertical" />
+        </LinearLayout>
     </ScrollView>
 
 </LinearLayout>
-
