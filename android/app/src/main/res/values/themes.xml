@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.BiometriaLazarus" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#1A237E</item>
+        <item name="colorPrimaryVariant">#0D47A1</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+</resources>
+

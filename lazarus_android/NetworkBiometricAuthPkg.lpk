@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <PathDelim Value="\"/>
+    <Name Value="NetworkBiometricAuthPkg"/>
+    <Type Value="RunAndDesignTime"/>
+    <Author Value="Conect Solutions TI"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Description Value="Componente de Autenticação Biométrica Android e Envio HTTP Local para VCL"/>
+    <Version Major="1" Minor="0" Release="0"/>
+    <Files Count="1">
+      <Item1>
+        <Filename Value="UNetworkBiometricAuth.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="UNetworkBiometricAuth"/>
+      </Item1>
+    </Files>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="FCL"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="indylaz"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
+

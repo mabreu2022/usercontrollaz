@@ -1,0 +1,161 @@
+object frmBiometricServer: TfrmBiometricServer
+  Left = 350
+  Height = 480
+  Top = 200
+  Width = 640
+  Caption = 'Conect Solutions TI - Servidor Biométrico VCL/LCL'
+  ClientHeight = 480
+  ClientWidth = 640
+  Color = clBtnFace
+  Font.CharSet = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Pitch = fpVariable
+  Font.Quality = fqDraft
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object pnlHeader: TPanel
+    Left = 0
+    Height = 70
+    Top = 0
+    Width = 640
+    Align = alTop
+    BevelOuter = bvNone
+    Color = 2960685
+    ParentColor = False
+    TabOrder = 0
+    object lblTitulo: TLabel
+      Left = 20
+      Height = 25
+      Top = 12
+      Width = 371
+      Caption = 'Autenticação Biométrica Mobile -> VCL'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clWhite
+      Font.Height = -19
+      Font.Name = 'Segoe UI Semibold'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object lblSubtitulo: TLabel
+      Left = 20
+      Height = 15
+      Top = 40
+      Width = 384
+      Caption = 'Recepção de credenciais biométricas Android em rede local via Indy HTTP'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = 13816530
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+  end
+  object pnlStatus: TPanel
+    Left = 20
+    Height = 100
+    Top = 85
+    Width = 600
+    BevelOuter = bvNone
+    Color = 2829270
+    ParentColor = False
+    TabOrder = 1
+    object lblStatusAcesso: TLabel
+      Left = 16
+      Height = 20
+      Top = 18
+      Width = 359
+      Caption = 'SISTEMA BLOQUEADO - AGUARDANDO BIOMETRIA'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clWhite
+      Font.Height = -15
+      Font.Name = 'Segoe UI'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object lblUsuarioAutenticado: TLabel
+      Left = 16
+      Height = 15
+      Top = 46
+      Width = 230
+      Caption = 'Nenhum usuário autenticado no momento'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clSilver
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+    object lblIPPorta: TLabel
+      Left = 16
+      Height = 15
+      Top = 70
+      Width = 205
+      Caption = 'Servidor Inicializando na Porta 8080...'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = 14474460
+      Font.Height = -11
+      Font.Name = 'Segoe UI'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+  end
+  object mmoLogs: TMemo
+    Left = 20
+    Height = 220
+    Top = 200
+    Width = 600
+    Color = 1973790
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = 10354425
+    Font.Height = -12
+    Font.Name = 'Consolas'
+    Font.Pitch = fpFixed
+    Font.Quality = fqDraft
+    ParentFont = False
+    ReadOnly = True
+    ScrollBars = ssVertical
+    TabOrder = 2
+  end
+  object btnIniciarServidor: TButton
+    Left = 20
+    Height = 32
+    Top = 435
+    Width = 140
+    Caption = 'Reiniciar Servidor'
+    OnClick = btnIniciarServidorClick
+    TabOrder = 3
+  end
+  object btnPararServidor: TButton
+    Left = 175
+    Height = 32
+    Top = 435
+    Width = 140
+    Caption = 'Parar Servidor'
+    OnClick = btnPararServidorClick
+    TabOrder = 4
+  end
+  object IdHTTPServer: TIdHTTPServer
+    Bindings = <>
+    DefaultPort = 8080
+    OnCommandGet = IdHTTPServerCommandGet
+    Left = 560
+    Top = 430
+  end
+end
+

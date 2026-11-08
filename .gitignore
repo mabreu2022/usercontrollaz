@@ -1,0 +1,48 @@
+# Android & Gradle
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+.cxx/
+captures/
+
+# Free Pascal & Lazarus
+lib/
+*.compiled
+*.o
+*.ppu
+*.a
+*.rst
+*.lrs
+*.rsj
+*.or
+*.bak
+*.orig
+*~
+backup/
+
+# Delphi / Embarcadero
+*.dcu
+*.rsm
+*.map
+*.identcache
+*.dproj.local
+*.cbproj.local
+__history/
+__recovery/
+
+# Windows Executables & Logs
+*.exe
+*.dll
+*.so
+*.log
+
+# OS & IDEs
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
