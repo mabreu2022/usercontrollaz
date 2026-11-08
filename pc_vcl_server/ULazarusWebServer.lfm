@@ -170,7 +170,7 @@ object frmBiometricServerLazarus: TfrmBiometricServerLazarus
       ClientWidth = 752
       object gridUsuarios: TStringGrid
         Left = 16
-        Height = 310
+        Height = 190
         Top = 16
         Width = 720
         ColCount = 6
@@ -179,6 +179,91 @@ object frmBiometricServerLazarus: TfrmBiometricServerLazarus
         RowCount = 5
         ScrollBars = ssAutoBoth
         TabOrder = 0
+        OnClick = gridUsuariosClick
+      end
+      object pnlAlterarNivel: TPanel
+        Left = 16
+        Height = 110
+        Top = 215
+        Width = 720
+        BevelOuter = bvNone
+        Color = 15328734
+        ParentColor = False
+        TabOrder = 1
+        object lblTituloAlterar: TLabel
+          Left = 16
+          Height = 17
+          Top = 10
+          Width = 370
+          Caption = '⚡ ALTERAR NÍVEL DO USUÁRIO SELECIONADO NA GRADE'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = 10040115
+          Font.Height = -13
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblUsuarioSelecionado: TLabel
+          Left = 16
+          Height = 15
+          Top = 38
+          Width = 450
+          Caption = 'Usuário: (Nenhum selecionado. Clique em uma linha da tabela acima)'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblAlterarNivel: TLabel
+          Left = 16
+          Height = 15
+          Top = 72
+          Width = 120
+          Caption = 'Novo Nível de Acesso:'
+        end
+        object cboAlterarNivel: TComboBox
+          Left = 145
+          Height = 28
+          Top = 67
+          Width = 160
+          ItemHeight = 15
+          ItemIndex = 1
+          Items.Strings = (
+            '1 - Consulta'
+            '2 - Operador'
+            '3 - Gerente'
+            '4 - Administrador'
+          )
+          Style = csDropDownList
+          TabOrder = 0
+          Text = '2 - Operador'
+        end
+        object btnSalvarNivel: TButton
+          Left = 320
+          Height = 32
+          Top = 65
+          Width = 220
+          Caption = '💾 SALVAR NOVO NÍVEL'
+          OnClick = btnSalvarNivelClick
+          TabOrder = 1
+        end
+        object btnExcluirUsuario: TButton
+          Left = 555
+          Height = 32
+          Top = 65
+          Width = 140
+          Caption = '🗑️ Excluir Usuário'
+          OnClick = btnExcluirUsuarioClick
+          TabOrder = 2
+        end
       end
       object pnlNovoUsuario: TPanel
         Left = 16

@@ -63,6 +63,11 @@ type
     function BuscarPorLogin(const ALogin: string): TUsuario;
     function BuscarPorDeviceId(const ADeviceId: string): TUsuario;
     
+    // Altera o nível de permissão (RBAC) do usuário e persiste
+    function AlterarNivel(const ALogin: string; NovoNivel: TNivelAcesso): Boolean;
+    function AlterarNivelPorId(AId: Integer; NovoNivel: TNivelAcesso): Boolean;
+    function ExcluirUsuario(const ALogin: string): Boolean;
+
     // Vincula o celular ao usuário após o primeiro cadastro biométrico
     function VincularDispositivo(const ALogin, ADeviceId: string): Boolean;
     
@@ -114,6 +119,11 @@ begin
   end;
 end;
 
+function BoolToJSON(B: Boolean): string;
+begin
+  if B then Result := 'true' else Result := 'false';
+end;
+
 function TUsuario.ToJSONString: string;
 begin
   Result := Format(
@@ -124,8 +134,8 @@ begin
       FLogin,
       NivelToString,
       Ord(FNivel),
-      BoolToStr(FBiometriaAtiva, 'true', 'false'),
-      BoolToStr(FAtivo, 'true', 'false'),
+      BoolToJSON(FBiometriaAtiva),
+      BoolToJSON(FAtivo),
       FDeviceId
     ]
   );
@@ -218,6 +228,59 @@ begin
   end;
 end;
 
+function TUserManager.AlterarNivel(const ALogin: string; NovoNivel: TNivelAcesso): Boolean;
+var
+  U: TUsuario;
+begin
+  Result := False;
+  U := BuscarPorLogin(ALogin);
+  if Assigned(U) then
+  begin
+    U.Nivel := NovoNivel;
+    SalvarParaArquivo;
+    Result := True;
+  end;
+end;
+
+function TUserManager.AlterarNivelPorId(AId: Integer; NovoNivel: TNivelAcesso): Boolean;
+var
+  i: Integer;
+  U: TUsuario;
+begin
+  Result := False;
+  for i := 0 to FUsuarios.Count - 1 do
+  begin
+    U := TUsuario(FUsuarios[i]);
+    if U.Id = AId then
+    begin
+      U.Nivel := NovoNivel;
+      SalvarParaArquivo;
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
+function TUserManager.ExcluirUsuario(const ALogin: string): Boolean;
+var
+  i: Integer;
+  Target: string;
+begin
+  Result := False;
+  Target := LowerCase(Trim(ALogin));
+  for i := 0 to FUsuarios.Count - 1 do
+  begin
+    if TUsuario(FUsuarios[i]).Login = Target then
+    begin
+      TUsuario(FUsuarios[i]).Free;
+      FUsuarios.Delete(i);
+      SalvarParaArquivo;
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
 function TUserManager.VincularDispositivo(const ALogin, ADeviceId: string): Boolean;
 var
   U: TUsuario;
@@ -300,16 +363,129 @@ procedure TUserManager.CarregarDeArquivo;
 var
   Lines: TStringList;
   Raw: string;
+  {$IFDEF FPC}
+  JData: TJSONData;
+  JArr: TJSONArray;
+  JObj: TJSONObject;
+  i: Integer;
+  U: TUsuario;
+  NNivel: TNivelAcesso;
+  {$ELSE}
+  JVal: TJSONValue;
+  JArr: TJSONArray;
+  JObj: TJSONObject;
+  i: Integer;
+  U: TUsuario;
+  NNivel: TNivelAcesso;
+  ValCode: Integer;
+  {$ENDIF}
 begin
-  // Carregamento simples mantido em JSON
-  if not FileExists(FFilePath) then Exit;
+  if not FileExists(FFilePath) then
+  begin
+    PopularUsuariosIniciais;
+    Exit;
+  end;
+
   Lines := TStringList.Create;
   try
     Lines.LoadFromFile(FFilePath);
-    Raw := Lines.Text;
-    // Se o arquivo estiver vazio, repopula padrão
-    if Trim(Raw) = '' then
+    Raw := Trim(Lines.Text);
+    if Raw = '' then
+    begin
       PopularUsuariosIniciais;
+      Exit;
+    end;
+
+    {$IFDEF FPC}
+    try
+      JData := GetJSON(Raw);
+      try
+        if JData is TJSONArray then
+        begin
+          JArr := TJSONArray(JData);
+          for i := 0 to FUsuarios.Count - 1 do
+            TUsuario(FUsuarios[i]).Free;
+          FUsuarios.Clear;
+
+          for i := 0 to JArr.Count - 1 do
+          begin
+            if JArr.Types[i] = jtObject then
+            begin
+              JObj := TJSONObject(JArr.Items[i]);
+              case JObj.Get('nivel_code', 2) of
+                1: NNivel := naConsulta;
+                2: NNivel := naOperador;
+                3: NNivel := naGerente;
+                4: NNivel := naAdministrador;
+              else
+                NNivel := naOperador;
+              end;
+              U := TUsuario.Create(
+                JObj.Get('id', i + 1),
+                JObj.Get('nome', ''),
+                JObj.Get('login', ''),
+                NNivel
+              );
+              U.DeviceId := JObj.Get('device_id', '');
+              U.BiometriaAtiva := JObj.Get('biometria_ativa', False);
+              U.Ativo := JObj.Get('ativo', True);
+              FUsuarios.Add(U);
+            end;
+          end;
+        end;
+      finally
+        JData.Free;
+      end;
+    except
+      if FUsuarios.Count = 0 then
+        PopularUsuariosIniciais;
+    end;
+    {$ELSE}
+    try
+      JVal := TJSONObject.ParseJSONValue(Raw);
+      if Assigned(JVal) and (JVal is TJSONArray) then
+      begin
+        JArr := TJSONArray(JVal);
+        try
+          for i := 0 to FUsuarios.Count - 1 do
+            TUsuario(FUsuarios[i]).Free;
+          FUsuarios.Clear;
+
+          for i := 0 to JArr.Count - 1 do
+          begin
+            if JArr.Items[i] is TJSONObject then
+            begin
+              JObj := TJSONObject(JArr.Items[i]);
+              ValCode := StrToIntDef(JObj.GetValue<string>('nivel_code', '2'), 2);
+              case ValCode of
+                1: NNivel := naConsulta;
+                2: NNivel := naOperador;
+                3: NNivel := naGerente;
+                4: NNivel := naAdministrador;
+              else
+                NNivel := naOperador;
+              end;
+              U := TUsuario.Create(
+                StrToIntDef(JObj.GetValue<string>('id', '1'), i + 1),
+                JObj.GetValue<string>('nome', ''),
+                JObj.GetValue<string>('login', ''),
+                NNivel
+              );
+              U.DeviceId := JObj.GetValue<string>('device_id', '');
+              U.BiometriaAtiva := SameText(JObj.GetValue<string>('biometria_ativa', 'false'), 'true');
+              U.Ativo := SameText(JObj.GetValue<string>('ativo', 'true'), 'true');
+              FUsuarios.Add(U);
+            end;
+          end;
+        finally
+          JVal.Free;
+        end;
+      end;
+    except
+      if FUsuarios.Count = 0 then
+        PopularUsuariosIniciais;
+    end;
+    {$ENDIF}
   finally
     Lines.Free;
   end;

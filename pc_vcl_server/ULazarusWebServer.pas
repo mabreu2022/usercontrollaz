@@ -55,6 +55,13 @@ type
 
     tabUserControl: TTabSheet;
     gridUsuarios: TStringGrid;
+    pnlAlterarNivel: TPanel;
+    lblTituloAlterar: TLabel;
+    lblUsuarioSelecionado: TLabel;
+    lblAlterarNivel: TLabel;
+    cboAlterarNivel: TComboBox;
+    btnSalvarNivel: TButton;
+    btnExcluirUsuario: TButton;
     pnlNovoUsuario: TPanel;
     lblNovoNome: TLabel;
     edtNovoNome: TEdit;
@@ -83,6 +90,9 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure btnIniciarServidorClick(Sender: TObject);
     procedure btnPararServidorClick(Sender: TObject);
+    procedure gridUsuariosClick(Sender: TObject);
+    procedure btnSalvarNivelClick(Sender: TObject);
+    procedure btnExcluirUsuarioClick(Sender: TObject);
     procedure btnCadastrarUsuarioClick(Sender: TObject);
     procedure btnVincularAparelhoClick(Sender: TObject);
     procedure btnAtualizarGradeClick(Sender: TObject);
@@ -93,6 +103,7 @@ type
     FServerThread: TServerThread;
     FCurrentSyncData: TAuthSyncRecord;
     FAguardandoAprovacaoPDV: Boolean;
+    FSelectedUserLogin: string;
 
     procedure DoLiberarAcessoMainThread;
     procedure AtualizarGradeUsuarios;
@@ -337,6 +348,104 @@ begin
         gridUsuarios.Cells[5, i + 1] := 'Sim'
       else
         gridUsuarios.Cells[5, i + 1] := 'Nao';
+    end;
+  end;
+end;
+
+procedure TfrmBiometricServerLazarus.gridUsuariosClick(Sender: TObject);
+var
+  RowIndex: Integer;
+  LoginCell: string;
+  U: TUsuario;
+begin
+  RowIndex := gridUsuarios.Row;
+  if (RowIndex > 0) and (RowIndex < gridUsuarios.RowCount) then
+  begin
+    LoginCell := Trim(gridUsuarios.Cells[2, RowIndex]); // Coluna 2 = Login
+    if (LoginCell <> '') and Assigned(GUserManager) then
+    begin
+      U := GUserManager.BuscarPorLogin(LoginCell);
+      if Assigned(U) then
+      begin
+        FSelectedUserLogin := U.Login;
+        lblUsuarioSelecionado.Caption := Format('Usuário Selecionado: %s (Login: %s) — Nível Atual: %s', [
+          U.Nome, U.Login, U.NivelToString
+        ]);
+        case U.Nivel of
+          naConsulta: cboAlterarNivel.ItemIndex := 0;
+          naOperador: cboAlterarNivel.ItemIndex := 1;
+          naGerente: cboAlterarNivel.ItemIndex := 2;
+          naAdministrador: cboAlterarNivel.ItemIndex := 3;
+        else
+          cboAlterarNivel.ItemIndex := 1;
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TfrmBiometricServerLazarus.btnSalvarNivelClick(Sender: TObject);
+var
+  NovoNivel: TNivelAcesso;
+  NivelStr: string;
+begin
+  if FSelectedUserLogin = '' then
+  begin
+    ShowMessage('Por favor, clique em um usuário na grade antes de salvar a alteração.');
+    Exit;
+  end;
+
+  case cboAlterarNivel.ItemIndex of
+    0: begin NovoNivel := naConsulta; NivelStr := 'Consulta'; end;
+    1: begin NovoNivel := naOperador; NivelStr := 'Operador'; end;
+    2: begin NovoNivel := naGerente; NivelStr := 'Gerente'; end;
+    3: begin NovoNivel := naAdministrador; NivelStr := 'Administrador'; end;
+  else
+    NovoNivel := naOperador;
+    NivelStr := 'Operador';
+  end;
+
+  if Assigned(GUserManager) then
+  begin
+    if GUserManager.AlterarNivel(FSelectedUserLogin, NovoNivel) then
+    begin
+      AtualizarGradeUsuarios;
+      lblUsuarioSelecionado.Caption := Format('Usuário Selecionado: %s — Nível Atualizado para: %s', [
+        FSelectedUserLogin, NivelStr
+      ]);
+      mmoLogs.Lines.Add(Format('[%s] UserControl: Nível do usuário "%s" alterado para %s com sucesso.', [
+        TimeToStr(Now), FSelectedUserLogin, NivelStr
+      ]));
+      ShowMessage(Format('Sucesso! O nível do usuário "%s" agora é "%s".', [
+        FSelectedUserLogin, NivelStr
+      ]));
+    end
+    else
+      ShowMessage('Erro: Não foi possível alterar o nível do usuário.');
+  end;
+end;
+
+procedure TfrmBiometricServerLazarus.btnExcluirUsuarioClick(Sender: TObject);
+begin
+  if FSelectedUserLogin = '' then
+  begin
+    ShowMessage('Clique em um usuário na grade para selecioná-lo antes de excluir.');
+    Exit;
+  end;
+
+  if MessageDlg('Confirmação', Format('Deseja realmente excluir o usuário "%s"?', [FSelectedUserLogin]),
+    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+  begin
+    if Assigned(GUserManager) then
+    begin
+      if GUserManager.ExcluirUsuario(FSelectedUserLogin) then
+      begin
+        mmoLogs.Lines.Add(Format('[%s] UserControl: Usuário "%s" removido.', [TimeToStr(Now), FSelectedUserLogin]));
+        FSelectedUserLogin := '';
+        lblUsuarioSelecionado.Caption := 'Usuário: (Nenhum selecionado. Clique em uma linha da tabela acima)';
+        AtualizarGradeUsuarios;
+        ShowMessage('Usuário excluído com sucesso!');
+      end;
     end;
   end;
 end;

@@ -39,6 +39,7 @@ __recovery/
 *.exe
 *.dll
 *.so
+*.obj
 *.log
 
 # OS & IDEs
