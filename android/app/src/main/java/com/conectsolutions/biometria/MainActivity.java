@@ -1,5 +1,6 @@
 package com.conectsolutions.biometria;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -172,26 +173,80 @@ public class MainActivity extends AppCompatActivity {
      * para cadastrar novos dedos de colaboradores sem precisar caçar nas configurações!
      */
     private void abrirCadastroBiometriaAndroid() {
-        appendLog("Abrindo assistente nativo para cadastrar novo dedo...");
-        txtStatus.setText("Cadastre a digital no assistente do Android e volte ao app.");
+        appendLog("Abrindo assistente de cadastro de digitais...");
+        txtStatus.setText("Cadastre a digital no assistente do celular e volte ao app.");
         txtStatus.setBackgroundColor(0xFFE8EAF6);
 
+        boolean sucesso = false;
+
+        // 1. Tentar abrir diretamente a tela de Digitais da Samsung One UI
         try {
-            Intent enrollIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                enrollIntent = new Intent(Settings.ACTION_BIOMETRIC_ENROLL);
-                enrollIntent.putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                        BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.BIOMETRIC_WEAK);
-            } else {
-                enrollIntent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
-            }
-            startActivity(enrollIntent);
-        } catch (Exception e) {
+            Intent samsungIntent = new Intent();
+            samsungIntent.setComponent(new ComponentName(
+                    "com.android.settings",
+                    "com.samsung.android.settings.biometrics.fingerprint.FingerprintEntry"
+            ));
+            samsungIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(samsungIntent);
+            sucesso = true;
+            appendLog("Tela Samsung Impressões Digitais acionada com sucesso.");
+        } catch (Exception e1) {
+            Log.w(TAG, "Falha intent Samsung FingerprintEntry: " + e1.getMessage());
+        }
+
+        // 2. Tentar action padrão FINGERPRINT_ENROLL
+        if (!sucesso) {
             try {
-                startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
-            } catch (Exception ex) {
-                Toast.makeText(this, "Abra Configurações > Segurança para cadastrar a digital.", Toast.LENGTH_LONG).show();
+                Intent enrollIntent = new Intent("android.settings.FINGERPRINT_ENROLL");
+                enrollIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(enrollIntent);
+                sucesso = true;
+                appendLog("Intent android.settings.FINGERPRINT_ENROLL acionada.");
+            } catch (Exception e2) {
+                Log.w(TAG, "Falha intent FINGERPRINT_ENROLL: " + e2.getMessage());
             }
+        }
+
+        // 3. Tentar Biometria e Segurança da Samsung
+        if (!sucesso) {
+            try {
+                Intent secIntent = new Intent("com.samsung.android.settings.BIOMETRICS_AND_SECURITY");
+                secIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(secIntent);
+                sucesso = true;
+                appendLog("Intent Samsung BIOMETRICS_AND_SECURITY acionada.");
+            } catch (Exception e3) {
+                Log.w(TAG, "Falha intent Samsung BIOMETRICS_AND_SECURITY: " + e3.getMessage());
+            }
+        }
+
+        // 4. Tentar Tela de Segurança e Privacidade do Android
+        if (!sucesso) {
+            try {
+                Intent secStandardIntent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+                secStandardIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(secStandardIntent);
+                sucesso = true;
+                appendLog("Intent ACTION_SECURITY_SETTINGS acionada.");
+            } catch (Exception e4) {
+                Log.w(TAG, "Falha intent ACTION_SECURITY_SETTINGS: " + e4.getMessage());
+            }
+        }
+
+        // 5. Fallback final: Configurações gerais
+        if (!sucesso) {
+            try {
+                Intent genIntent = new Intent(Settings.ACTION_SETTINGS);
+                genIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(genIntent);
+                sucesso = true;
+            } catch (Exception e5) {
+                Toast.makeText(this, "Abra Configurações do Android > Segurança > Impressões Digitais.", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        if (sucesso) {
+            Toast.makeText(this, "Insira seu PIN/Senha e toque em 'Adicionar impressão digital'", Toast.LENGTH_LONG).show();
         }
     }
 
