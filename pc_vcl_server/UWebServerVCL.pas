@@ -6,7 +6,8 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls,
   // Componentes Indy para Servidor HTTP
-  IdCustomHTTPServer, IdHTTPServer, IdContext, IdCustomTCPServer;
+  IdCustomHTTPServer, IdHTTPServer, IdContext, IdCustomTCPServer,
+  UUserControlBiometria;
 
 type
   { Dados transitórios passados do socket Indy para a Thread Principal }
@@ -222,12 +223,21 @@ begin
       AResponseInfo.ContentText := '{"code": 403, "result": "denied", "message": "Biometria recusada ou invalida."}';
     end;
   end
+  else if SameText(ARequestInfo.Document, '/usuarios') then
+  begin
+    AResponseInfo.ResponseNo := 200;
+    AResponseInfo.ContentType := 'application/json; charset=utf-8';
+    if Assigned(GUserManager) then
+      AResponseInfo.ContentText := GUserManager.ListarUsuariosJSON
+    else
+      AResponseInfo.ContentText := '[]';
+  end
   else
   begin
     // Rota desconhecida
     AResponseInfo.ResponseNo := 404;
     AResponseInfo.ContentType := 'text/plain; charset=utf-8';
-    AResponseInfo.ContentText := 'Rota nao encontrada. Use POST /biometria-sucesso';
+    AResponseInfo.ContentText := 'Rota nao encontrada. Use POST /biometria-sucesso ou GET /usuarios';
   end;
 end;
 

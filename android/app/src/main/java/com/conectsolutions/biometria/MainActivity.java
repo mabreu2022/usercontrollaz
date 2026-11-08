@@ -1,5 +1,6 @@
 package com.conectsolutions.biometria;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
 
 import com.google.android.material.tabs.TabLayout;
 
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText edtPort;
     private EditText edtUser;
     private Button btnAutenticar;
+    private Button btnCadastrarNovoDedo;
 
     // Campos Aba 2 (PDV)
     private Button btnAprovarPDV;
@@ -58,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtDeviceId;
     private TextView txtUsuarioVinculado;
     private Button btnTestarConexao;
+    private Button btnCadastrarNovoDedoTab3;
 
     // Feedback comum
     private TextView txtStatus;
@@ -83,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         edtPort = findViewById(R.id.edtPort);
         edtUser = findViewById(R.id.edtUser);
         btnAutenticar = findViewById(R.id.btnAutenticar);
+        btnCadastrarNovoDedo = findViewById(R.id.btnCadastrarNovoDedo);
 
         // Mapeamento Aba 2
         btnAprovarPDV = findViewById(R.id.btnAprovarPDV);
@@ -92,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         txtDeviceId = findViewById(R.id.txtDeviceId);
         txtUsuarioVinculado = findViewById(R.id.txtUsuarioVinculado);
         btnTestarConexao = findViewById(R.id.btnTestarConexao);
+        btnCadastrarNovoDedoTab3 = findViewById(R.id.btnCadastrarNovoDedoTab3);
 
         // Feedback
         txtStatus = findViewById(R.id.txtStatus);
@@ -141,6 +147,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Ação: Cadastrar Nova Digital no Android
+        View.OnClickListener clickCadastrarDedo = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirCadastroBiometriaAndroid();
+            }
+        };
+
+        btnCadastrarNovoDedo.setOnClickListener(clickCadastrarDedo);
+        btnCadastrarNovoDedoTab3.setOnClickListener(clickCadastrarDedo);
+
         // Ação Aba 3: Testar Conexão
         btnTestarConexao.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,6 +165,34 @@ public class MainActivity extends AppCompatActivity {
                 testarConexaoServidor();
             }
         });
+    }
+
+    /**
+     * Aciona diretamente o Assistente Oficial da Samsung / Android
+     * para cadastrar novos dedos de colaboradores sem precisar caçar nas configurações!
+     */
+    private void abrirCadastroBiometriaAndroid() {
+        appendLog("Abrindo assistente nativo para cadastrar novo dedo...");
+        txtStatus.setText("Cadastre a digital no assistente do Android e volte ao app.");
+        txtStatus.setBackgroundColor(0xFFE8EAF6);
+
+        try {
+            Intent enrollIntent;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                enrollIntent = new Intent(Settings.ACTION_BIOMETRIC_ENROLL);
+                enrollIntent.putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                        BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.BIOMETRIC_WEAK);
+            } else {
+                enrollIntent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+            }
+            startActivity(enrollIntent);
+        } catch (Exception e) {
+            try {
+                startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+            } catch (Exception ex) {
+                Toast.makeText(this, "Abra Configurações > Segurança para cadastrar a digital.", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void alternarAba(int posicao) {

@@ -229,11 +229,21 @@ begin
       AResponse.Content := '{"code": 403, "result": "denied", "message": "Biometria recusada pelo dispositivo."}';
     end;
   end
+  // 2. Rota para sincronizar lista de usuários com o celular
+  else if SameText(ARequest.PathInfo, '/usuarios') or SameText(ARequest.URL, '/usuarios') then
+  begin
+    AResponse.Code := 200;
+    AResponse.ContentType := 'application/json; charset=utf-8';
+    if Assigned(GUserManager) then
+      AResponse.Content := GUserManager.ListarUsuariosJSON
+    else
+      AResponse.Content := '[]';
+  end
   else
   begin
     AResponse.Code := 404;
     AResponse.ContentType := 'text/plain; charset=utf-8';
-    AResponse.Content := 'Rota nao encontrada. Use POST /biometria-sucesso';
+    AResponse.Content := 'Rota nao encontrada. Use POST /biometria-sucesso ou GET /usuarios';
   end;
 end;
 

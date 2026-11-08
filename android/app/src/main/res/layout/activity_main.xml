@@ -139,7 +139,19 @@
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="#1A237E" />
+                    android:backgroundTint="#1A237E"
+                    android:layout_marginBottom="10dp" />
+
+                <!-- Botão Direto para Cadastrar Nova Digital no Android -->
+                <Button
+                    android:id="@+id/btnCadastrarNovoDedo"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="➕ CADASTRAR NOVO DEDO / BIOMETRIA"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#1A237E"
+                    android:backgroundTint="#E8EAF6" />
             </LinearLayout>
 
             <!-- ========================================================= -->
@@ -274,6 +286,15 @@
                     android:textColor="#2E7D32"
                     android:textStyle="bold"
                     android:layout_marginBottom="14dp" />
+
+                <Button
+                    android:id="@+id/btnCadastrarNovoDedoTab3"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="➕ CADASTRAR NOVA DIGITAL NESTE CELULAR"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#1A237E"
+                    android:layout_marginBottom="8dp" />
 
                 <Button
                     android:id="@+id/btnTestarConexao"
