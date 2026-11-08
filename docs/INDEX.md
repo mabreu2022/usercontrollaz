@@ -52,3 +52,4 @@ c:\Projetos Antigrtavity\Biometria Lazarus\
     ├── UWebServerVCL.pas / .dfm                  # Servidor Delphi com Indy TIdHTTPServer
     └── UUserControlBiometria.pas                 # Núcleo de Permissões RBAC e Usuários
 ```
+

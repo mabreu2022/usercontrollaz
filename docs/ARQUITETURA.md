@@ -97,3 +97,4 @@ A solução suporta dois canais de transporte de rede:
    Os componentes de interface da VCL e LCL não aceitam modificações de threads secundárias do socket. O envio de dados para a interface é enfileirado estritamente na Thread Principal via `TThread.Queue`.
 3. **Tráfego HTTP sem SSL em Rede Local (`usesCleartextTraffic`)**:
    O `AndroidManifest.xml` foi configurado explicitamente para aceitar HTTP plano (`android:usesCleartextTraffic="true"`), dispensando a necessidade de instalar certificados SSL autoassinados em cada PC de desenvolvimento.
+

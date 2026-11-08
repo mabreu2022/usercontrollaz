@@ -73,6 +73,11 @@ type
     procedure SalvarParaArquivo;
     procedure CarregarDeArquivo;
 
+    // Acesso iterável aos usuários cadastrados
+    function Count: Integer;
+    function GetUsuario(Index: Integer): TUsuario;
+    property Usuarios[Index: Integer]: TUsuario read GetUsuario; default;
+
     // Retorna todos os usuários formatados em JSON
     function ListarUsuariosJSON: string;
   end;
@@ -308,6 +313,19 @@ begin
   finally
     Lines.Free;
   end;
+end;
+
+function TUserManager.Count: Integer;
+begin
+  Result := FUsuarios.Count;
+end;
+
+function TUserManager.GetUsuario(Index: Integer): TUsuario;
+begin
+  if (Index >= 0) and (Index < FUsuarios.Count) then
+    Result := TUsuario(FUsuarios[Index])
+  else
+    Result := nil;
 end;
 
 function TUserManager.ListarUsuariosJSON: string;

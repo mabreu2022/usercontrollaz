@@ -6,11 +6,12 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
+  ComCtrls, Grids,
   fphttpserver, fpjson, jsonparser,
   UUserControlBiometria;
 
 type
-  { TAuthSyncRecord }
+  { Dados transitórios passados do socket HTTP para a Thread Principal }
   TAuthSyncRecord = record
     UserName: string;
     FullName: string;
@@ -22,7 +23,7 @@ type
     Timestamp: TDateTime;
   end;
 
-  { TServerThread: Roda o TFPHttpServer em background sem travar o loop de eventos da interface LCL }
+  { TServerThread: Roda o TFPHttpServer em background para não travar a interface LCL }
   TServerThread = class(TThread)
   private
     FServer: TFPHttpServer;
@@ -39,6 +40,8 @@ type
 
   { TfrmBiometricServerLazarus }
   TfrmBiometricServerLazarus = class(TForm)
+    PageControl1: TPageControl;
+    tabStatus: TTabSheet;
     pnlHeader: TPanel;
     lblTitulo: TLabel;
     lblSubtitulo: TLabel;
@@ -50,16 +53,49 @@ type
     btnIniciarServidor: TButton;
     btnPararServidor: TButton;
 
+    tabUserControl: TTabSheet;
+    gridUsuarios: TStringGrid;
+    pnlNovoUsuario: TPanel;
+    lblNovoNome: TLabel;
+    edtNovoNome: TEdit;
+    lblNovoLogin: TLabel;
+    edtNovoLogin: TEdit;
+    lblNovoNivel: TLabel;
+    cboNovoNivel: TComboBox;
+    btnCadastrarUsuario: TButton;
+    btnVincularAparelho: TButton;
+    btnAtualizarGrade: TButton;
+    lblDicaUserControl: TLabel;
+
+    tabSimuladorPDV: TTabSheet;
+    pnlPDVHeader: TPanel;
+    lblPDVTitulo: TLabel;
+    lblPDVDescricao: TLabel;
+    lblPDVRequisito: TLabel;
+    pnlPDVStatus: TPanel;
+    lblPDVStatus: TLabel;
+    lblPDVDetalhe: TLabel;
+    btnSimularDesconto: TButton;
+    btnResetarSimulacao: TButton;
+    mmoPDVLogs: TMemo;
+
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnIniciarServidorClick(Sender: TObject);
     procedure btnPararServidorClick(Sender: TObject);
+    procedure btnCadastrarUsuarioClick(Sender: TObject);
+    procedure btnVincularAparelhoClick(Sender: TObject);
+    procedure btnAtualizarGradeClick(Sender: TObject);
+    procedure btnSimularDescontoClick(Sender: TObject);
+    procedure btnResetarSimulacaoClick(Sender: TObject);
 
   private
     FServerThread: TServerThread;
     FCurrentSyncData: TAuthSyncRecord;
+    FAguardandoAprovacaoPDV: Boolean;
 
     procedure DoLiberarAcessoMainThread;
+    procedure AtualizarGradeUsuarios;
   public
     procedure IniciarServidor(const APorta: Integer = 8080);
     procedure PararServidor;
@@ -107,7 +143,7 @@ begin
     FServer.Active := True;
   except
     on E: Exception do
-      // Ignora encerramento forçado do socket
+      // Encerramento limpo do socket
   end;
 end;
 
@@ -205,6 +241,8 @@ end;
 
 procedure TfrmBiometricServerLazarus.FormCreate(Sender: TObject);
 begin
+  FAguardandoAprovacaoPDV := False;
+  AtualizarGradeUsuarios;
   IniciarServidor(8080);
 end;
 
@@ -220,7 +258,7 @@ begin
     FServerThread := TServerThread.Create(APorta);
     lblIPPorta.Caption := Format('Servidor Ativo na Porta: %d (Aguardando Biometria Android...)', [APorta]);
     lblStatusAcesso.Caption := 'SISTEMA BLOQUEADO - AGUARDANDO BIOMETRIA';
-    pnlStatus.Color := $002B2BD6; // Vermelho
+    pnlStatus.Color := $002B2BD6; // Vermelho de bloqueio
     lblStatusAcesso.Font.Color := clWhite;
 
     mmoLogs.Lines.Add(Format('[%s] Servidor HTTP nativo FPC iniciado com sucesso na porta %d.', [TimeToStr(Now), APorta]));
@@ -250,6 +288,120 @@ begin
   PararServidor;
 end;
 
+procedure TfrmBiometricServerLazarus.AtualizarGradeUsuarios;
+var
+  i: Integer;
+  U: TUsuario;
+begin
+  gridUsuarios.RowCount := 1;
+  gridUsuarios.Cells[0, 0] := 'ID';
+  gridUsuarios.Cells[1, 0] := 'Nome Completo';
+  gridUsuarios.Cells[2, 0] := 'Login';
+  gridUsuarios.Cells[3, 0] := 'Nível de Acesso';
+  gridUsuarios.Cells[4, 0] := 'Dispositivo Mobile';
+  gridUsuarios.Cells[5, 0] := 'Biometria';
+
+  gridUsuarios.ColWidths[0] := 35;
+  gridUsuarios.ColWidths[1] := 180;
+  gridUsuarios.ColWidths[2] := 100;
+  gridUsuarios.ColWidths[3] := 120;
+  gridUsuarios.ColWidths[4] := 140;
+  gridUsuarios.ColWidths[5] := 90;
+
+  if Assigned(GUserManager) then
+  begin
+    for i := 0 to GUserManager.Count - 1 do
+    begin
+      U := GUserManager[i];
+      gridUsuarios.RowCount := gridUsuarios.RowCount + 1;
+      gridUsuarios.Cells[0, i + 1] := IntToStr(U.Id);
+      gridUsuarios.Cells[1, i + 1] := U.Nome;
+      gridUsuarios.Cells[2, i + 1] := U.Login;
+      gridUsuarios.Cells[3, i + 1] := U.NivelToString;
+      if U.DeviceId <> '' then
+        gridUsuarios.Cells[4, i + 1] := U.DeviceId
+      else
+        gridUsuarios.Cells[4, i + 1] := '(Pendente)';
+
+      if U.BiometriaAtiva then
+        gridUsuarios.Cells[5, i + 1] := 'Sim'
+      else
+        gridUsuarios.Cells[5, i + 1] := 'Nao';
+    end;
+  end;
+end;
+
+procedure TfrmBiometricServerLazarus.btnCadastrarUsuarioClick(Sender: TObject);
+var
+  NNome, NLogin: string;
+  Nivel: TNivelAcesso;
+begin
+  NNome := Trim(edtNovoNome.Text);
+  NLogin := Trim(edtNovoLogin.Text);
+
+  if (NNome = '') or (NLogin = '') then
+  begin
+    ShowMessage('Informe o Nome e o Login do novo usuário.');
+    Exit;
+  end;
+
+  case cboNovoNivel.ItemIndex of
+    0: Nivel := naConsulta;
+    1: Nivel := naOperador;
+    2: Nivel := naGerente;
+    3: Nivel := naAdministrador;
+  else
+    Nivel := naOperador;
+  end;
+
+  if Assigned(GUserManager) then
+  begin
+    GUserManager.AdicionarUsuario(NNome, NLogin, Nivel);
+    GUserManager.SalvarParaArquivo;
+    AtualizarGradeUsuarios;
+    ShowMessage(Format('Usuário "%s" cadastrado com sucesso!', [NNome]));
+  end;
+end;
+
+procedure TfrmBiometricServerLazarus.btnVincularAparelhoClick(Sender: TObject);
+begin
+  if FCurrentSyncData.DeviceId <> '' then
+  begin
+    if Assigned(GUserManager) then
+    begin
+      GUserManager.VincularDispositivo(FCurrentSyncData.UserName, FCurrentSyncData.DeviceId);
+      AtualizarGradeUsuarios;
+      ShowMessage(Format('Dispositivo "%s" vinculado com sucesso ao usuário "%s"!', [
+        FCurrentSyncData.DeviceId, FCurrentSyncData.UserName
+      ]));
+    end;
+  end
+  else
+    ShowMessage('Nenhum aparelho enviou biometria recentemente para ser vinculado.');
+end;
+
+procedure TfrmBiometricServerLazarus.btnAtualizarGradeClick(Sender: TObject);
+begin
+  AtualizarGradeUsuarios;
+end;
+
+procedure TfrmBiometricServerLazarus.btnSimularDescontoClick(Sender: TObject);
+begin
+  FAguardandoAprovacaoPDV := True;
+  pnlPDVStatus.Color := $002B2BD6; // Vermelho
+  lblPDVStatus.Caption := 'AGUARDANDO APROVAÇÃO BIOMÉTRICA DO GERENTE...';
+  lblPDVDetalhe.Caption := 'O Gerente deve validar a digital no smartphone para autorizar o desconto.';
+  mmoPDVLogs.Lines.Add(Format('[%s] SOLICITAÇÃO ABERTA: Desconto de 25% (R$ 150,00) aguardando biometria...', [TimeToStr(Now)]));
+end;
+
+procedure TfrmBiometricServerLazarus.btnResetarSimulacaoClick(Sender: TObject);
+begin
+  FAguardandoAprovacaoPDV := False;
+  pnlPDVStatus.Color := 2829270;
+  lblPDVStatus.Caption := 'VENDA EM ABERTO - NENHUMA EXCEÇÃO SOLICITADA';
+  lblPDVDetalhe.Caption := 'Clique em "SOLICITAR LIBERAÇÃO NO CELULAR" para testar a aprovação remota.';
+end;
+
 procedure TfrmBiometricServerLazarus.NotificarAutenticacao(const AUser, AFullName, ALevel: string; ALevelCode: Integer;
   const AStatus, AIP, ADeviceId: string);
 begin
@@ -268,6 +420,7 @@ end;
 
 procedure TfrmBiometricServerLazarus.DoLiberarAcessoMainThread;
 begin
+  // 1. Atualizar painel da Aba 1 (Login / Desbloqueio Geral)
   pnlStatus.Color := $002E8B57; // Verde esmeralda (Liberado)
   lblStatusAcesso.Caption := Format('ACESSO LIBERADO: %s (%s)', [UpperCase(FCurrentSyncData.FullName), FCurrentSyncData.UserLevel]);
   lblStatusAcesso.Font.Color := clWhite;
@@ -284,8 +437,35 @@ begin
     [DateTimeToStr(FCurrentSyncData.Timestamp), FCurrentSyncData.FullName, FCurrentSyncData.UserLevel, FCurrentSyncData.ClientIP]
   ));
 
+  // 2. Se a simulação de PDV da Aba 3 estiver ativa, verifica nível gerencial
+  if FAguardandoAprovacaoPDV then
+  begin
+    if FCurrentSyncData.LevelCode >= 3 then // Nível Gerente (3) ou Admin (4)
+    begin
+      pnlPDVStatus.Color := $002E8B57; // Verde
+      lblPDVStatus.Caption := 'DESCONTO DE 25% APROVADO COM SUCESSO!';
+      lblPDVDetalhe.Caption := Format('Autorizado remotamente por %s (%s) às %s.', [
+        FCurrentSyncData.FullName, FCurrentSyncData.UserLevel, TimeToStr(Now)
+      ]);
+      mmoPDVLogs.Lines.Add(Format('>>> [%s] OPERAÇÃO LIBERADA: Gerente %s autorizou o desconto!', [
+        TimeToStr(Now), FCurrentSyncData.FullName
+      ]));
+      FAguardandoAprovacaoPDV := False;
+    end
+    else
+    begin
+      lblPDVStatus.Caption := 'RECUSADO: NÍVEL DE PRIVILÉGIO INSUFICIENTE!';
+      lblPDVDetalhe.Caption := Format('O usuário %s possui nível "%s". Exigido: Gerente ou Administrador.', [
+        FCurrentSyncData.FullName, FCurrentSyncData.UserLevel
+      ]);
+      mmoPDVLogs.Lines.Add(Format('>>> [%s] RECUSA: %s tentou aprovar com nível insuficiente (%s)', [
+        TimeToStr(Now), FCurrentSyncData.FullName, FCurrentSyncData.UserLevel
+      ]));
+    end;
+  end;
+
+  AtualizarGradeUsuarios;
   BringToFront;
 end;
 
 end.
-

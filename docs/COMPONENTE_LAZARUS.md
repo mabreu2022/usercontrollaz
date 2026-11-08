@@ -106,3 +106,4 @@ end.
 * A função nativa `Java_com_conectsolutions_biometria_BiometricHelper_onNativeBiometricSuccess` utiliza a convenção `cdecl`.
 * Quando o Java confirma a digital, a procedure converte o `jstring` para string nativa Pascal e invoca a worker thread `TBiometricHttpWorkerThread`.
 * A worker thread executa o transporte HTTP fora da thread de interface, evitando travamentos visuais ou o encerramento do processo pelo watchdog do Android.
+

@@ -1,11 +1,11 @@
 object frmBiometricServerLazarus: TfrmBiometricServerLazarus
-  Left = 350
-  Height = 480
-  Top = 200
-  Width = 640
-  Caption = 'Conect Solutions TI - Servidor Biométrico VCL/LCL (Lazarus)'
-  ClientHeight = 480
-  ClientWidth = 640
+  Left = 320
+  Height = 560
+  Top = 160
+  Width = 760
+  Caption = 'Conect Solutions TI - Servidor Biométrico & UserControl (Lazarus LCL)'
+  ClientHeight = 560
+  ClientWidth = 760
   Color = clBtnFace
   Font.CharSet = ANSI_CHARSET
   Font.Color = clWindowText
@@ -17,138 +17,413 @@ object frmBiometricServerLazarus: TfrmBiometricServerLazarus
   OnDestroy = FormDestroy
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
-  object pnlHeader: TPanel
+  object PageControl1: TPageControl
     Left = 0
-    Height = 70
+    Height = 560
     Top = 0
-    Width = 640
-    Align = alTop
-    BevelOuter = bvNone
-    Color = 2960685
-    ParentColor = False
+    Width = 760
+    ActivePage = tabStatus
+    Align = alClient
+    TabIndex = 0
     TabOrder = 0
-    object lblTitulo: TLabel
-      Left = 20
-      Height = 25
-      Top = 12
-      Width = 371
-      Caption = 'Autenticação Biométrica Mobile -> VCL'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clWhite
-      Font.Height = -19
-      Font.Name = 'Segoe UI Semibold'
-      Font.Pitch = fpVariable
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
+    object tabStatus: TTabSheet
+      Caption = 'Monitoramento do Servidor'
+      ClientHeight = 530
+      ClientWidth = 752
+      object pnlHeader: TPanel
+        Left = 0
+        Height = 65
+        Top = 0
+        Width = 752
+        Align = alTop
+        BevelOuter = bvNone
+        Color = 2960685
+        ParentColor = False
+        TabOrder = 0
+        object lblTitulo: TLabel
+          Left = 20
+          Height = 25
+          Top = 10
+          Width = 371
+          Caption = 'Autenticação Biométrica Mobile -> VCL'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clWhite
+          Font.Height = -19
+          Font.Name = 'Segoe UI Semibold'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblSubtitulo: TLabel
+          Left = 20
+          Height = 15
+          Top = 38
+          Width = 430
+          Caption = 'Recepção de credenciais biométricas Android em rede local (Lazarus LCL/FPC)'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = 13816530
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          ParentColor = False
+          ParentFont = False
+        end
+      end
+      object pnlStatus: TPanel
+        Left = 16
+        Height = 90
+        Top = 75
+        Width = 720
+        BevelOuter = bvNone
+        Color = 2829270
+        ParentColor = False
+        TabOrder = 1
+        object lblStatusAcesso: TLabel
+          Left = 16
+          Height = 20
+          Top = 15
+          Width = 359
+          Caption = 'SISTEMA BLOQUEADO - AGUARDANDO BIOMETRIA'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clWhite
+          Font.Height = -15
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblUsuarioAutenticado: TLabel
+          Left = 16
+          Height = 15
+          Top = 42
+          Width = 230
+          Caption = 'Nenhum usuário autenticado no momento'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clSilver
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblIPPorta: TLabel
+          Left = 16
+          Height = 15
+          Top = 64
+          Width = 205
+          Caption = 'Servidor Inicializando na Porta 8080...'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = 14474460
+          Font.Height = -11
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          ParentColor = False
+          ParentFont = False
+        end
+      end
+      object mmoLogs: TMemo
+        Left = 16
+        Height = 300
+        Top = 175
+        Width = 720
+        Color = 1973790
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = 10354425
+        Font.Height = -12
+        Font.Name = 'Consolas'
+        Font.Pitch = fpFixed
+        Font.Quality = fqDraft
+        ParentFont = False
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 2
+      end
+      object btnIniciarServidor: TButton
+        Left = 16
+        Height = 32
+        Top = 485
+        Width = 140
+        Caption = 'Reiniciar Servidor'
+        OnClick = btnIniciarServidorClick
+        TabOrder = 3
+      end
+      object btnPararServidor: TButton
+        Left = 165
+        Height = 32
+        Top = 485
+        Width = 140
+        Caption = 'Parar Servidor'
+        OnClick = btnPararServidorClick
+        TabOrder = 4
+      end
     end
-    object lblSubtitulo: TLabel
-      Left = 20
-      Height = 15
-      Top = 40
-      Width = 420
-      Caption = 'Recepção de credenciais biométricas Android em rede local (Lazarus LCL/FPC)'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = 13816530
-      Font.Height = -12
-      Font.Name = 'Segoe UI'
-      Font.Pitch = fpVariable
-      Font.Quality = fqDraft
-      ParentColor = False
-      ParentFont = False
+    object tabUserControl: TTabSheet
+      Caption = 'Gestão de Usuários (RBAC)'
+      ClientHeight = 530
+      ClientWidth = 752
+      object gridUsuarios: TStringGrid
+        Left = 16
+        Height = 310
+        Top = 16
+        Width = 720
+        ColCount = 6
+        DefaultColWidth = 110
+        FixedCols = 0
+        RowCount = 5
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+      object pnlNovoUsuario: TPanel
+        Left = 16
+        Height = 180
+        Top = 335
+        Width = 720
+        BevelOuter = bvNone
+        Color = 16119285
+        ParentColor = False
+        TabOrder = 1
+        object lblNovoNome: TLabel
+          Left = 16
+          Height = 15
+          Top = 12
+          Width = 91
+          Caption = 'Nome Completo:'
+        end
+        object edtNovoNome: TEdit
+          Left = 16
+          Height = 28
+          Top = 30
+          Width = 220
+          TabOrder = 0
+          Text = 'Novo Colaborador'
+        end
+        object lblNovoLogin: TLabel
+          Left = 250
+          Height = 15
+          Top = 12
+          Width = 33
+          Caption = 'Login:'
+        end
+        object edtNovoLogin: TEdit
+          Left = 250
+          Height = 28
+          Top = 30
+          Width = 140
+          TabOrder = 1
+          Text = 'novo.usuario'
+        end
+        object lblNovoNivel: TLabel
+          Left = 410
+          Height = 15
+          Top = 12
+          Width = 86
+          Caption = 'Nível de Acesso:'
+        end
+        object cboNovoNivel: TComboBox
+          Left = 410
+          Height = 28
+          Top = 30
+          Width = 150
+          ItemHeight = 15
+          ItemIndex = 1
+          Items.Strings = (
+            '1 - Consulta'
+            '2 - Operador'
+            '3 - Gerente'
+            '4 - Administrador'
+          )
+          Style = csDropDownList
+          TabOrder = 2
+          Text = '2 - Operador'
+        end
+        object btnCadastrarUsuario: TButton
+          Left = 16
+          Height = 36
+          Top = 75
+          Width = 180
+          Caption = 'CADASTRAR USUÁRIO'
+          OnClick = btnCadastrarUsuarioClick
+          TabOrder = 3
+        end
+        object btnVincularAparelho: TButton
+          Left = 210
+          Height = 36
+          Top = 75
+          Width = 240
+          Caption = 'VINCULAR CELULAR CONECTADO'
+          OnClick = btnVincularAparelhoClick
+          TabOrder = 4
+        end
+        object btnAtualizarGrade: TButton
+          Left = 465
+          Height = 36
+          Top = 75
+          Width = 150
+          Caption = 'Atualizar Lista'
+          OnClick = btnAtualizarGradeClick
+          TabOrder = 5
+        end
+        object lblDicaUserControl: TLabel
+          Left = 16
+          Height = 15
+          Top = 135
+          Width = 590
+          Caption = 'Dica: O dispositivo móvel é vinculado pelo seu DeviceId único para impedir o uso de aparelhos de terceiros.'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clGray
+          Font.Height = -11
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          ParentColor = False
+          ParentFont = False
+        end
+      end
     end
-  end
-  object pnlStatus: TPanel
-    Left = 20
-    Height = 100
-    Top = 85
-    Width = 600
-    BevelOuter = bvNone
-    Color = 2829270
-    ParentColor = False
-    TabOrder = 1
-    object lblStatusAcesso: TLabel
-      Left = 16
-      Height = 20
-      Top = 18
-      Width = 359
-      Caption = 'SISTEMA BLOQUEADO - AGUARDANDO BIOMETRIA'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clWhite
-      Font.Height = -15
-      Font.Name = 'Segoe UI'
-      Font.Pitch = fpVariable
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
+    object tabSimuladorPDV: TTabSheet
+      Caption = 'Simulador 2FA (PDV / Caixa)'
+      ClientHeight = 530
+      ClientWidth = 752
+      object pnlPDVHeader: TPanel
+        Left = 16
+        Height = 120
+        Top = 16
+        Width = 720
+        BevelOuter = bvNone
+        Color = 15724527
+        ParentColor = False
+        TabOrder = 0
+        object lblPDVTitulo: TLabel
+          Left = 20
+          Height = 25
+          Top = 15
+          Width = 359
+          Caption = 'Terminal PDV 01 — Venda em Andamento'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblPDVDescricao: TLabel
+          Left = 20
+          Height = 15
+          Top = 50
+          Width = 477
+          Caption = 'Operação Solicitada: Desconto especial de 25% (R$ 150,00) solicitado pelo Operador de Caixa.'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = 3355443
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblPDVRequisito: TLabel
+          Left = 20
+          Height = 15
+          Top = 75
+          Width = 442
+          Caption = 'Exigência de Segurança: Aprovação Biométrica de nível GERENTE ou ADMINISTRADOR.'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = 1644825
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+      end
+      object pnlPDVStatus: TPanel
+        Left = 16
+        Height = 110
+        Top = 150
+        Width = 720
+        BevelOuter = bvNone
+        Color = 2829270
+        ParentColor = False
+        TabOrder = 1
+        object lblPDVStatus: TLabel
+          Left = 20
+          Height = 25
+          Top = 25
+          Width = 413
+          Caption = 'AGUARDANDO APROVAÇÃO BIOMÉTRICA...'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clWhite
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblPDVDetalhe: TLabel
+          Left = 20
+          Height = 15
+          Top = 65
+          Width = 427
+          Caption = 'O gerente responsável deve confirmar a digital no seu smartphone conectado à rede.'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clSilver
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Pitch = fpVariable
+          Font.Quality = fqDraft
+          ParentColor = False
+          ParentFont = False
+        end
+      end
+      object btnSimularDesconto: TButton
+        Left = 16
+        Height = 44
+        Top = 280
+        Width = 320
+        Caption = 'SOLICITAR LIBERAÇÃO NO CELULAR'
+        OnClick = btnSimularDescontoClick
+        TabOrder = 2
+      end
+      object btnResetarSimulacao: TButton
+        Left = 350
+        Height = 44
+        Top = 280
+        Width = 160
+        Caption = 'Redefinir Venda'
+        OnClick = btnResetarSimulacaoClick
+        TabOrder = 3
+      end
+      object mmoPDVLogs: TMemo
+        Left = 16
+        Height = 175
+        Top = 340
+        Width = 720
+        Color = 1973790
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = 10354425
+        Font.Height = -12
+        Font.Name = 'Consolas'
+        Font.Pitch = fpFixed
+        Font.Quality = fqDraft
+        ParentFont = False
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 4
+      end
     end
-    object lblUsuarioAutenticado: TLabel
-      Left = 16
-      Height = 15
-      Top = 46
-      Width = 230
-      Caption = 'Nenhum usuário autenticado no momento'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clSilver
-      Font.Height = -12
-      Font.Name = 'Segoe UI'
-      Font.Pitch = fpVariable
-      Font.Quality = fqDraft
-      ParentColor = False
-      ParentFont = False
-    end
-    object lblIPPorta: TLabel
-      Left = 16
-      Height = 15
-      Top = 70
-      Width = 205
-      Caption = 'Servidor Inicializando na Porta 8080...'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = 14474460
-      Font.Height = -11
-      Font.Name = 'Segoe UI'
-      Font.Pitch = fpVariable
-      Font.Quality = fqDraft
-      ParentColor = False
-      ParentFont = False
-    end
-  end
-  object mmoLogs: TMemo
-    Left = 20
-    Height = 220
-    Top = 200
-    Width = 600
-    Color = 1973790
-    Font.CharSet = ANSI_CHARSET
-    Font.Color = 10354425
-    Font.Height = -12
-    Font.Name = 'Consolas'
-    Font.Pitch = fpFixed
-    Font.Quality = fqDraft
-    ParentFont = False
-    ReadOnly = True
-    ScrollBars = ssVertical
-    TabOrder = 2
-  end
-  object btnIniciarServidor: TButton
-    Left = 20
-    Height = 32
-    Top = 435
-    Width = 140
-    Caption = 'Reiniciar Servidor'
-    OnClick = btnIniciarServidorClick
-    TabOrder = 3
-  end
-  object btnPararServidor: TButton
-    Left = 175
-    Height = 32
-    Top = 435
-    Width = 140
-    Caption = 'Parar Servidor'
-    OnClick = btnPararServidorClick
-    TabOrder = 4
   end
 end
-

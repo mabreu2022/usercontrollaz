@@ -84,3 +84,4 @@ Para autorizar o tráfego de entrada na porta TCP `8080`, execute no Prompt de C
 ```cmd
 netsh advfirewall firewall add rule name="Servidor Biometrico VCL Conect" dir=in action=allow protocol=TCP localport=8080
 ```
+

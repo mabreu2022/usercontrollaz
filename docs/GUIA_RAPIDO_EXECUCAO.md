@@ -64,3 +64,4 @@ Invoke-RestMethod -Uri "http://localhost:8080/biometria-sucesso" `
 ```
 
 O servidor registrará a autenticação do usuário "Maurício Oliveira" com nível Administrador e liberará a interface imediatamente.
+

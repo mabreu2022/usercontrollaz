@@ -108,3 +108,4 @@ public static native void onNativeBiometricError(int errorCode, String errorMess
 ```
 
 Essas chamadas são envolvidas em blocos `try/catch (UnsatisfiedLinkError)` para permitir que a classe funcione de forma autônoma mesmo durante testes em que o código compilado em Pascal ainda não foi carregado na memória da JVM.
+
