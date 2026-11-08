@@ -114,3 +114,23 @@ Os usuários são mantidos em formato JSON desacoplado, permitindo que a soluç�
 ]
 ```
 
+---
+
+## 6. Alteração de Níveis de Acesso na Interface Desktop
+
+Na aba **"Gestão de Usuários (RBAC)"** do programa desktop ([ServerLazarus.exe](file:///c:/Projetos%20Antigrtavity/Biometria%20Lazarus/pc_vcl_server/ServerLazarus.exe)):
+
+1. **Seleção Direta:** Clique em qualquer usuário listado na tabela (ex: `Ana Operadora Caixa`).
+2. O painel **"⚡ ALTERAR NÍVEL DO USUÁRIO SELECIONADO NA GRADE"** exibe automaticamente o nome, login e nível atual do colaborador selecionado.
+3. No campo **"Novo Nível de Acesso"**, escolha o novo patamar desejado:
+   - `1 - Consulta` (Apenas visualização)
+   - `2 - Operador` (Operações rotineiras de caixa/vendas)
+   - `3 - Gerente` (Aprovação de descontos, estornos e cancelamentos 2FA)
+   - `4 - Administrador` (Controle total do sistema)
+4. Clique em **`💾 SALVAR NOVO NÍVEL`**:
+   - O objeto `TUsuario` é atualizado em tempo real.
+   - O arquivo `usuarios_usercontrol.json` é gravado no disco imediatamente.
+   - A tabela da interface se atualiza visualmente.
+   - As próximas autenticações móveis deste usuário já assumirão o novo nível de autorização.
+5. **Exclusão de Usuários:** O botão `🗑️ Excluir Usuário` permite remover cadastros que não façam mais parte da equipe, com confirmação prévia via diálogo nativo.
+
