@@ -274,17 +274,17 @@ end;
 
 procedure TfrmBiometricServerLazarus.IniciarServidor(const APorta: Integer);
 begin
-  if FServerThread = nil then
-  begin
-    FServerThread := TServerThread.Create(APorta);
-    lblIPPorta.Caption := Format('Servidor Ativo na Porta: %d (Aguardando Biometria Android...)', [APorta]);
-    lblStatusAcesso.Caption := 'SISTEMA BLOQUEADO - AGUARDANDO BIOMETRIA';
-    pnlStatus.Color := $002B2BD6; // Vermelho de bloqueio
-    lblStatusAcesso.Font.Color := clWhite;
+  if FServerThread <> nil then
+    PararServidor;
 
-    mmoLogs.Lines.Add(Format('[%s] Servidor HTTP nativo FPC iniciado com sucesso na porta %d.', [TimeToStr(Now), APorta]));
-    mmoLogs.Lines.Add('Aguardando conexoes em: POST http://<IP_DO_PC>:' + IntToStr(APorta) + '/biometria-sucesso');
-  end;
+  FServerThread := TServerThread.Create(APorta);
+  lblIPPorta.Caption := Format('Servidor Ativo na Porta: %d (Aguardando Biometria Android...)', [APorta]);
+  lblStatusAcesso.Caption := 'SISTEMA BLOQUEADO - AGUARDANDO BIOMETRIA';
+  pnlStatus.Color := $002B2BD6; // Vermelho de bloqueio
+  lblStatusAcesso.Font.Color := clWhite;
+
+  mmoLogs.Lines.Add(Format('[%s] Servidor HTTP nativo FPC iniciado com sucesso na porta %d.', [TimeToStr(Now), APorta]));
+  mmoLogs.Lines.Add('Aguardando conexoes em: POST http://<IP_DO_PC>:' + IntToStr(APorta) + '/biometria-sucesso');
 end;
 
 procedure TfrmBiometricServerLazarus.PararServidor;

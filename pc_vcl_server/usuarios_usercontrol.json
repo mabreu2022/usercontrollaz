@@ -1,6 +1,6 @@
 [
   {"id": 1, "nome": "Maurício Oliveira", "login": "mauricio", "nivel": "Administrador", "nivel_code": 4, "biometria_ativa": true, "ativo": true, "device_id": "SM-G780G-3147cae4a55eae02"},
   {"id": 2, "nome": "Carlos Gerência", "login": "carlos.gerente", "nivel": "Gerente", "nivel_code": 3, "biometria_ativa": true, "ativo": true, "device_id": ""},
-  {"id": 3, "nome": "Ana Operadora Caixa", "login": "ana.caixa", "nivel": "Operador", "nivel_code": 2, "biometria_ativa": true, "ativo": true, "device_id": "SM-G780G-3147cae4a55eae02"},
+  {"id": 3, "nome": "Ana Operadora Caixa", "login": "ana.caixa", "nivel": "Administrador", "nivel_code": 4, "biometria_ativa": true, "ativo": true, "device_id": "SM-G780G-3147cae4a55eae02"},
   {"id": 4, "nome": "Novo Colaborador", "login": "novo.usuario", "nivel": "Operador", "nivel_code": 2, "biometria_ativa": false, "ativo": true, "device_id": ""}
 ]
